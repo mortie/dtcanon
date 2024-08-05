@@ -28,7 +28,8 @@ class Node:
         self.parent = parent
         self.props = {}
         self.children = {}
-        self.label = None
+        self.labels = set()
+        self.flags = set()
         self.location = None
 
     def name(self):
@@ -255,9 +256,14 @@ def parse_node(r, node, labels, pending_label_nodes):
             skip(r, b";")
             return
 
+        flags = set()
         name = read_ident(r)
-
+        while len(name) > 2 and name[0] == ord("/") and name[-1] == ord("/"):
+            flags.add(name)
+            skip_whitespace(r)
+            name = read_ident(r)
         skip_whitespace(r)
+
         if r.next == b"=":
             r.consume()
             skip_whitespace(r)
@@ -274,35 +280,37 @@ def parse_node(r, node, labels, pending_label_nodes):
             skip_whitespace(r)
             node.props[name] = True
         elif r.next == b":" or r.next == b"{":
-            if r.next == b":":
-                label = name
+            child_labels = set()
+            while r.next == b":":
                 r.consume()
+                child_labels.add(name)
                 skip_whitespace(r)
                 name = read_ident(r)
                 skip_whitespace(r)
-            else:
-                label = None
 
             if name in node.children:
                 child = node.children[name]
-            elif label and label in pending_label_nodes:
-                child = pending_label_nodes[label]
-                child.location = (r.filename, r.line, r.column)
-                child.parent = node
-                del pending_label_nodes[label]
             else:
+                child = None
+                for label in child_labels:
+                    if label not in pending_label_nodes:
+                        continue
+                    child = pending_label_nodes[label]
+                    child.location = (r.filename, r.line, r.column)
+                    child.parent = node
+                    del pending_label_nodes[label]
+                    break
+
+            if child is None:
                 child = Node(node)
                 child.location = (r.filename, r.line, r.column)
                 node.children[name] = child
 
-            if label:
+            child.flags = flags
+
+            for label in child_labels:
+                child.labels.add(label)
                 labels[label] = child
-                if child.label and child.label != label:
-                    print(
-                        "Warning: Conflicting labels for " + str(child.path(), "utf-8") + ": " +
-                        str(child.label, "utf-8") + " vs " + str(label, "utf-8"),
-                        file=sys.stderr)
-                child.label = label
 
             parse_node(r, child, labels, pending_label_nodes)
         else:
@@ -372,8 +380,11 @@ def print_flat_node(node, name, outfile, tag_locations):
 
     prefix = ""
 
-    if node.label:
-        prefix += str(node.label, "utf-8") + ": "
+    for flag in sorted(node.flags):
+        print(str(flag, "utf-8"))
+
+    for label in sorted(node.labels):
+        prefix += str(label, "utf-8") + ": "
 
     if name == b"":
         prefix += "/ "
@@ -395,6 +406,8 @@ def print_flat_node(node, name, outfile, tag_locations):
 
 def print_flat_document(roots, outfile, tag_locations):
     for k in sorted(roots.keys()):
+        for flag in sorted(roots[k].flags):
+            print(str(flag, "utf-8"))
         if k == b"/":
             print_flat_node(roots[k], b"", outfile, tag_locations)
         else:
@@ -414,16 +427,22 @@ def print_dts_node(node, depth, outfile, tag_locations):
             f, l, c = child.location
             print("  " * depth + f"// {str(f, 'utf-8')}:{l}:{c}", file=outfile)
 
-        if child.label:
-            print("  " * depth + str(child.label, "utf-8") + ": " + str(k, "utf-8") + " {", file=outfile)
-        else:
-            print("  " * depth + str(k, "utf-8") + " {", file=outfile)
+        for flag in sorted(child.flags):
+            print("  " * depth + str(flag, "utf-8"))
+
+        prefix = ""
+        for label in sorted(child.labels):
+            prefix += str(label, "utf-8") + ": "
+
+        print("  " * depth + prefix + str(k, "utf-8") + " {", file=outfile)
         print_dts_node(child, depth + 1, outfile, tag_locations)
         print("  " * depth + "};", file=outfile)
 
 def print_dts_document(roots, outfile, tag_locations):
     print("/dts-v1/;", file=outfile)
     for k in sorted(roots.keys()):
+        for flag in sorted(roots[k].flags):
+            print(str(flag, "utf-8"))
         print(str(k, "utf-8") + " {", file=outfile)
         print_dts_node(roots[k], 1, outfile, tag_locations)
         print("};", file=outfile)
@@ -443,7 +462,7 @@ def symbolize_nodes(nodes, symbols, path = None):
             subpath = path + b"/" + name
 
         if subpath in symbols:
-            node.label = symbols[subpath]
+            node.labels.add(symbols[subpath])
 
         symbolize_nodes(node.children, symbols, subpath)
 
