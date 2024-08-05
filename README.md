@@ -29,7 +29,7 @@ Rejecting invalid devicetree syntax is a non-goal.
 
 Here's a list of things which DTCanon can do:
 
-### Parse a .dts file and included .dtsi + header files
+### Parse a .dts file and included .dtsi + header files.
 
 DTCanon will output a single .dts file with all C preprocessor macros expanded
 and all overrides resolved.
