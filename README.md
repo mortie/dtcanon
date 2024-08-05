@@ -90,3 +90,8 @@ Options:
   --tag-locations: Annotate nodes with their locations in the input file.
   --symbolize:     Add labels to nodes from a symbols table, if any.
 ```
+
+## License
+
+DTCanon is licensed under the GPL v3.
+See [LICENSE](./LICENSE) for details.
