@@ -4,6 +4,27 @@ While working on embedded Linux type projects, I frequently have a need
 to deal with devicetree files in various ways.
 DTCanon is a tool I've made which can parse .dts files and transform them.
 
+## Caveat
+
+DTCanon's devicetree parser was written in a hurry to solve a problem.
+It was written to parse .dts files I had at hand,
+not according to the devicetree syntax spec.
+It is probably not 100% correct.
+There are probably correct .dts files which DTCanon can't parse,
+and there are definitely incorrect .dts files which DTCanon *can* parse.
+
+If you find examples of valid devicetree syntax which DTCanon fails to parse,
+please file a bug.
+Also, if you find examples of *invalid* devicetree syntax
+which is nonetheless out there in the world,
+please file a bug, and we can try to accomodate for common types of
+buggy devicetree code.
+
+If you find examples of *invalid* devicetree syntax which DTCanon *can* parse,
+do *not* file a bug.
+DTCanon is not a linter.
+Rejecting invalid devicetree syntax is a non-goal.
+
 ## Features
 
 Here's a list of things which DTCanon can do:
