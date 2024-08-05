@@ -488,12 +488,12 @@ if len(sys.argv) <= 1:
     print("Usage:", sys.argv[0], "[cpp options] [options] file...")
     print()
     print("Options:")
-    print("  -o <file>:       Output to <file> instead of stdout")
-    print("  --output-flat:   Output a flattened tree instead of a nested tree.")
-    print("                   The output isn't valid DeviceTree syntax,")
-    print("                   but this is often useful for diffing.")
-    print("  --tag-locations: Annotate nodes with their locations in the input file.")
-    print("  --symbolize:     Add labels to nodes from a symbols table, if any.")
+    print("  -o <file>:   Output to <file> instead of stdout")
+    print("  --flatten:   Output a flattened tree instead of a nested tree.")
+    print("               The output isn't valid DeviceTree syntax,")
+    print("               but this is often useful for diffing.")
+    print("  --locations: Annotate nodes with their locations in the input file.")
+    print("  --symbolize: Add labels to nodes from a symbols table, if any.")
     exit(1)
 
 args = ["cpp", "-nostdinc", "-undef", "-xassembler-with-cpp"]

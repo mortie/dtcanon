@@ -75,7 +75,7 @@ it's sometimes hard to find which exact file which defines a node.
 DTCanon can annotate nodes in the output with the file name and line number
 where the node is defined.
 
-Tag nodes with source locations with `--tag-locations`.
+Tag nodes with source locations with `--locations`.
 
 ## Usage
 
@@ -83,12 +83,12 @@ Tag nodes with source locations with `--tag-locations`.
 Usage: ./dtcanon.py [cpp options] [options] file...
 
 Options:
-  -o <file>:       Output to <file> instead of stdout
-  --output-flat:   Output a flattened tree instead of a nested tree.
-                   The output isn't valid DeviceTree syntax,
-                   but this is often useful for diffing.
-  --tag-locations: Annotate nodes with their locations in the input file.
-  --symbolize:     Add labels to nodes from a symbols table, if any.
+  -o <file>:   Output to <file> instead of stdout
+  --flatten:   Output a flattened tree instead of a nested tree.
+               The output isn't valid DeviceTree syntax,
+               but this is often useful for diffing.
+  --locations: Annotate nodes with their locations in the input file.
+  --symbolize: Add labels to nodes from a symbols table, if any.
 ```
 
 ## License
