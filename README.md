@@ -112,6 +112,139 @@ Options:
   --symbolize: Add labels to nodes from a symbols table, if any.
 ```
 
+## Examples
+
+### Diff two versions of a devicetree
+
+These commands will diff the devicetree for the NanoPi R5C between
+Linux versions 6.9 and 6.10:
+
+```
+$ cd linux
+$ git checkout v6.9
+$ dtcanon.py -Iinclude --flatten -o nanopi-r5c_6.9.dts arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5c.dts
+$ git checkout v6.10
+$ dtcanon.py -Iinclude --flatten -o nanopi-r5c_6.10.dts arch/arm64/boot/dts/rockchip/rk3568-nanopi-r5c.dts
+$ git diff --no-index nanopi-r5c_6.9.dts nanopi-r5c_6.10.dts
+```
+
+Those commands will output:
+
+```
+i-r5c_6.10.dts | cat
+diff --git a/nanopi-r5c_6.9.dts b/nanopi-r5c_6.10.dts
+index 0004ef95ec62..b2350afdd148 100644
+--- a/nanopi-r5c_6.9.dts
++++ b/nanopi-r5c_6.10.dts
+@@ -64,8 +64,15 @@ cpu0: /cpus/cpu@0 {
+   clocks = <&scmi_clk 0>;
+   compatible = "arm,cortex-a55";
+   cpu-supply = <&vdd_cpu>;
++  d-cache-line-size = <64>;
++  d-cache-sets = <128>;
++  d-cache-size = <0x8000>;
+   device_type = "cpu";
+   enable-method = "psci";
++  i-cache-line-size = <64>;
++  i-cache-sets = <128>;
++  i-cache-size = <0x8000>;
++  next-level-cache = <&l3_cache>;
+   operating-points-v2 = <&cpu0_opp_table>;
+   reg = <0x0 0x0>;
+ };
+@@ -73,8 +80,15 @@ cpu1: /cpus/cpu@100 {
+   #cooling-cells = <2>;
+   compatible = "arm,cortex-a55";
+   cpu-supply = <&vdd_cpu>;
++  d-cache-line-size = <64>;
++  d-cache-sets = <128>;
++  d-cache-size = <0x8000>;
+   device_type = "cpu";
+   enable-method = "psci";
++  i-cache-line-size = <64>;
++  i-cache-sets = <128>;
++  i-cache-size = <0x8000>;
++  next-level-cache = <&l3_cache>;
+   operating-points-v2 = <&cpu0_opp_table>;
+   reg = <0x0 0x100>;
+ };
+@@ -82,8 +96,15 @@ cpu2: /cpus/cpu@200 {
+   #cooling-cells = <2>;
+   compatible = "arm,cortex-a55";
+   cpu-supply = <&vdd_cpu>;
++  d-cache-line-size = <64>;
++  d-cache-sets = <128>;
++  d-cache-size = <0x8000>;
+   device_type = "cpu";
+   enable-method = "psci";
++  i-cache-line-size = <64>;
++  i-cache-sets = <128>;
++  i-cache-size = <0x8000>;
++  next-level-cache = <&l3_cache>;
+   operating-points-v2 = <&cpu0_opp_table>;
+   reg = <0x0 0x200>;
+ };
+@@ -91,8 +112,15 @@ cpu3: /cpus/cpu@300 {
+   #cooling-cells = <2>;
+   compatible = "arm,cortex-a55";
+   cpu-supply = <&vdd_cpu>;
++  d-cache-line-size = <64>;
++  d-cache-sets = <128>;
++  d-cache-size = <0x8000>;
+   device_type = "cpu";
+   enable-method = "psci";
++  i-cache-line-size = <64>;
++  i-cache-sets = <128>;
++  i-cache-size = <0x8000>;
++  next-level-cache = <&l3_cache>;
+   operating-points-v2 = <&cpu0_opp_table>;
+   reg = <0x0 0x300>;
+ };
+@@ -739,6 +767,14 @@ vop_mmu: /iommu@fe043e00 {
+   reg = <0x0 0xfe043e00 0x0 0x100>, <0x0 0xfe043f00 0x0 0x100>;
+   status = "okay";
+ };
++l3_cache: /l3-cache {
++  cache-level = <2>;
++  cache-line-size = <64>;
++  cache-sets = <512>;
++  cache-size = <0x80000>;
++  cache-unified;
++  compatible = "cache";
++};
+ dsi_dphy0: /mipi-dphy@fe850000 {
+   #phy-cells = <0>;
+   clock-names = "ref", "pclk";
+```
+
+Looks like 6.10 added a bunch of properties for i-cache and d-cache to /cpus/cpu@N nodes!
+
+### Decompile a devicetree
+
+Say you're on Armbian and you want to inspect your devicetree,
+which is in /boot/dts/rockchip/rk3588-nanopi-r6c.dtb.
+You can run `dtc` to decompile it like so:
+
+```
+dtc -I dtb -O dts /boot/dts/rockchip/rk3588s-nanopi-r6c.dtb
+```
+
+And you will see proper textual devicetree code.
+However, none of the nodes will have labels.
+That means that if you're writing a devicetree overlay file,
+you must first find the node you want to override, then manually resolve its path,
+then look up that path in the symbol table in `/__symbols__` to figure out
+which label you should override.
+
+With DTCanon, you can instead run this command:
+
+```
+dtc -I dtb -O dts /boot/dts/rockchip-rk3588s-nanopi-r6c.dtb | dtcanon.py --symbolize
+```
+
+and get a devicetree where all nodes with a label are annotated with their label(s),
+as you would see in a hand-written devicetree file.
+
 ## License
 
 DTCanon is licensed under the GPL v3.
