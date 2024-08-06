@@ -130,7 +130,7 @@ $ git diff --no-index nanopi-r5c_6.9.dts nanopi-r5c_6.10.dts
 
 Those commands will output:
 
-```
+```diff
 i-r5c_6.10.dts | cat
 diff --git a/nanopi-r5c_6.9.dts b/nanopi-r5c_6.10.dts
 index 0004ef95ec62..b2350afdd148 100644
