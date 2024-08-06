@@ -381,7 +381,7 @@ def print_flat_node(node, name, outfile, tag_locations):
     prefix = ""
 
     for flag in sorted(node.flags):
-        print(str(flag, "utf-8"))
+        print(str(flag, "utf-8"), file=outfile)
 
     for label in sorted(node.labels):
         prefix += str(label, "utf-8") + ": "
@@ -407,7 +407,7 @@ def print_flat_node(node, name, outfile, tag_locations):
 def print_flat_document(roots, outfile, tag_locations):
     for k in sorted(roots.keys()):
         for flag in sorted(roots[k].flags):
-            print(str(flag, "utf-8"))
+            print(str(flag, "utf-8"), file=outfile)
         if k == b"/":
             print_flat_node(roots[k], b"", outfile, tag_locations)
         else:
@@ -428,7 +428,7 @@ def print_dts_node(node, depth, outfile, tag_locations):
             print("  " * depth + f"// {str(f, 'utf-8')}:{l}:{c}", file=outfile)
 
         for flag in sorted(child.flags):
-            print("  " * depth + str(flag, "utf-8"))
+            print("  " * depth + str(flag, "utf-8"), file=outfile)
 
         prefix = ""
         for label in sorted(child.labels):
@@ -511,7 +511,7 @@ while idx < len(sys.argv):
         outfile = open(arg[2:], "w")
     elif arg == "--flatten":
         flatten = True
-    elif arg == "--tag-locations":
+    elif arg == "--locations":
         tag_locations = True
     elif arg == "--symbolize":
         symbolize = True
